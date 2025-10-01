@@ -8,26 +8,26 @@ import shutil
 import platform
 
 class RawConverter:
-    """Waters .raw 文件转换器"""
-    
+    """Waters .raw file converter"""
+
     def __init__(self):
         self.logger = logging.getLogger('RawConverter')
         self.is_windows = platform.system() == "Windows"
         self.msconvert_path = self._find_msconvert() if self.is_windows else None
-        
+
     def _find_msconvert(self) -> Optional[str]:
-        """查找 MSConvert 可执行文件"""
+        """Find MSConvert executable"""
         if not self.is_windows:
             return None
-            
-        # ProteoWizard 常见安装路径
+
+        # Common ProteoWizard installation paths
         possible_paths = [
             r"C:\Program Files\ProteoWizard\msconvert.exe",
             r"C:\Program Files (x86)\ProteoWizard\msconvert.exe",
             r"C:\Program Files\ProteoWizard\ProteoWizard\msconvert.exe",
             r"C:\Program Files (x86)\ProteoWizard\ProteoWizard\msconvert.exe"
         ]
-        
+
         for path in possible_paths:
             if Path(path).exists():
                 return path
@@ -36,7 +36,7 @@ class RawConverter:
         return None
         
     def convert_to_mzml(self, raw_dir: Path) -> Path:
-        """使用 MSConvert 将 Waters .raw 文件夹转换为 mzML 格式"""
+        """Use MSConvert to convert Waters .raw folder to mzML format"""
         if not self.is_windows:
             raise RuntimeError("MSConvert with vendor file support only works on Windows")
             
@@ -50,23 +50,23 @@ class RawConverter:
             )
             
         try:
-            # 创建临时目录存放转换后的文件
+            # Create temporary directory for converted files
             temp_dir = Path(tempfile.mkdtemp())
             output_file = temp_dir / f"{raw_dir.stem}.mzML"
-            
-            # 构建 MSConvert 命令
+
+            # Build MSConvert command
             cmd = [
                 self.msconvert_path,
                 str(raw_dir),
-                '--mzML',                    # 输出格式
-                '-o', str(temp_dir),         # 输出目录
-                '--filter', "peakPicking",   # 峰检测
-                '--filter', "msLevel 1-",    # 所有MS级别
-                '--zlib',                    # 压缩
+                '--mzML',                    # Output format
+                '-o', str(temp_dir),         # Output directory
+                '--filter', "peakPicking",   # Peak detection
+                '--filter', "msLevel 1-",    # All MS levels
+                '--zlib',                    # Compression
                 '--ignoreUnknownInstrumentError'
             ]
-            
-            # 执行转换
+
+            # Execute conversion
             self.logger.info(f"Converting {raw_dir} to mzML...")
             process = subprocess.Popen(
                 cmd,
@@ -86,14 +86,14 @@ class RawConverter:
             if not output_file.exists():
                 raise FileNotFoundError(f"MSConvert did not generate output file: {output_file}")
                 
-            # 将文件移动到目标目录
+            # Move file to target directory
             target_dir = raw_dir.parent.parent / 'mzml'
             target_dir.mkdir(exist_ok=True)
             target_file = target_dir / output_file.name
-            
+
             shutil.move(str(output_file), str(target_file))
-            
-            # 清理临时目录
+
+            # Clean up temporary directory
             shutil.rmtree(temp_dir)
             
             self.logger.info(f"Conversion completed: {target_file}")
@@ -104,7 +104,7 @@ class RawConverter:
             raise
             
     def check_msconvert(self) -> bool:
-        """检查 MSConvert 是否可用"""
+        """Check if MSConvert is available"""
         if not self.is_windows:
             return False
             
@@ -124,9 +124,9 @@ class RawConverter:
             return False
             
     def read_raw_folder(self, raw_dir: Path) -> Dict:
-        """读取完整的 Waters .raw 文件夹"""
+        """Read complete Waters .raw folder"""
         if not self.is_windows:
-            # 在非Windows系统上返回模拟数据用于开发测试
+            # Return mock data for development testing on non-Windows systems
             return {
                 'ms_data': None,
                 'pda_data': None,
@@ -136,5 +136,5 @@ class RawConverter:
                     'operator': 'Test User'
                 }
             }
-            
-        # ... 其余代码保持不变 ... 
+
+        # ... rest of the code remains unchanged ...

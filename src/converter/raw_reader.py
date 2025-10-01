@@ -18,19 +18,19 @@ class RawScanInfo:
     base_peak_mz: float
 
 class RawFileReader:
-    """直接读取Waters .raw文件的解析器"""
-    
+    """Direct parser for reading Waters .raw files"""
+
     def __init__(self):
         self.logger = logging.getLogger('RawFileReader')
-        self.chunk_size = 1000  # 每次处理的扫描数
-        
+        self.chunk_size = 1000  # Number of scans to process at once
+
     def read_raw_file(self, raw_file: Path, memory_efficient: bool = True) -> Dict:
         """
-        直接读取.raw文件，使用分块处理减少内存占用
-        
+        Read .raw file directly, using chunked processing to reduce memory usage
+
         Args:
-            raw_file: .raw文件路径
-            memory_efficient: 是否使用内存优化模式
+            raw_file: .raw file path
+            memory_efficient: Whether to use memory-optimized mode
         """
         try:
             reader = MSFileReader(str(raw_file))
@@ -42,21 +42,21 @@ class RawFileReader:
                 return self._read_all_at_once(reader, num_scans)
                 
     def _read_by_chunks(self, reader: MSFileReader, num_scans: int) -> Dict:
-        """分块读取数据"""
+        """Read data in chunks"""
         ms_data_chunks = []
         pda_data_chunks = []
-        
+
         for chunk_start in range(0, num_scans, self.chunk_size):
             chunk_end = min(chunk_start + self.chunk_size, num_scans)
-            
-            # 处理当前块
+
+            # Process current chunk
             chunk_data = self._process_scan_chunk(reader, chunk_start + 1, chunk_end + 1)
-            
+
             ms_data_chunks.extend(chunk_data['ms_data'])
             if chunk_data['pda_data']:
                 pda_data_chunks.extend(chunk_data['pda_data'])
-                
-            # 强制垃圾回收
+
+            # Force garbage collection
             gc.collect()
             
         # 合并所有块的数据
@@ -80,7 +80,7 @@ class RawFileReader:
         }
             
     def _get_scan_info(self, reader: MSFileReader, scan_num: int) -> RawScanInfo:
-        """获取扫描信息"""
+        """Get scan information"""
         try:
             header = reader.GetScanHeaderInfoForScanNum(scan_num)
             return RawScanInfo(
@@ -97,7 +97,7 @@ class RawFileReader:
             raise
             
     def _get_spectrum(self, reader: MSFileReader, scan_num: int) -> Dict:
-        """获取质谱数据"""
+        """Get mass spectrum data"""
         try:
             mz_array, intensity_array = reader.GetMassListFromScanNum(scan_num)
             return {
@@ -109,7 +109,7 @@ class RawFileReader:
             raise
             
     def _get_pda_spectrum(self, reader: MSFileReader, scan_num: int) -> Optional[Dict]:
-        """获取PDA光谱数据"""
+        """Get PDA spectrum data"""
         try:
             if hasattr(reader, 'GetPDASpectrum'):
                 wavelengths, intensities = reader.GetPDASpectrum(scan_num)

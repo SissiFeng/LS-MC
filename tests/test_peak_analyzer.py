@@ -20,7 +20,7 @@ class TestPeakAnalyzer:
         })
         
     def test_detect_product(self, analyzer, sample_peaks):
-        # 测试成功检测
+        # Test successful detection
         detected, mass, rt = analyzer.detect_product(
             sample_peaks, 
             target_mass=410.18,
@@ -30,7 +30,7 @@ class TestPeakAnalyzer:
         assert pytest.approx(mass, abs=0.001) == 410.1828
         assert pytest.approx(rt, abs=0.001) == 0.5
         
-        # 测试未检测到
+        # Test not detected
         detected, mass, rt = analyzer.detect_product(
             sample_peaks,
             target_mass=415.0,
@@ -44,7 +44,7 @@ class TestPeakAnalyzer:
         purity = analyzer.calculate_purity(sample_peaks)
         assert 0 <= purity <= 100
         
-        # 测试时间窗口内的纯度计算
+        # Test purity calculation within time window
         window_peaks = sample_peaks[
             (sample_peaks['retention_time'] >= 0.2) &
             (sample_peaks['retention_time'] <= 2.5)

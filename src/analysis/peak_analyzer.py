@@ -14,7 +14,7 @@ class PeakInfo:
     width: float
 
 class PeakAnalyzer:
-    """峰检测和分析模块"""
+    """Peak detection and analysis module"""
     
     def __init__(self):
         self.logger = logging.getLogger('PeakAnalyzer')
@@ -25,30 +25,30 @@ class PeakAnalyzer:
                       tolerance: float = 0.5
                       ) -> Tuple[bool, Optional[float], Optional[float]]:
         """
-        检测目标产物峰
-        
+        Detect target product peak
+
         Args:
-            peaks_data: 包含峰信息的DataFrame
-            target_mass: 目标质量
-            tolerance: 质量匹配容差 (Da)
-            
+            peaks_data: DataFrame containing peak information
+            target_mass: Target mass
+            tolerance: Mass matching tolerance (Da)
+
         Returns:
             Tuple[bool, Optional[float], Optional[float]]:
-                - 是否检测到产物
-                - 检测到的质量 (如果检测到)
-                - 保留时间 (如果检测到)
+                - Whether product is detected
+                - Detected mass (if detected)
+                - Retention time (if detected)
         """
         try:
-            # 在质量容差范围内查找匹配的峰
+            # Find matching peaks within mass tolerance range
             mass_matches = peaks_data[
                 (peaks_data['mass'] >= target_mass - tolerance) &
                 (peaks_data['mass'] <= target_mass + tolerance)
             ]
-            
+
             if mass_matches.empty:
                 return False, None, None
-                
-            # 选择强度最高的峰
+
+            # Select the peak with highest intensity
             best_match = mass_matches.loc[mass_matches['intensity'].idxmax()]
             
             return True, best_match['mass'], best_match['retention_time']
@@ -62,34 +62,34 @@ class PeakAnalyzer:
                         time_range: Tuple[float, float] = (0.2, 2.5)
                         ) -> float:
         """
-        计算纯度 (指定时间窗口内主峰面积占比)
-        
+        Calculate purity (main peak area ratio within specified time window)
+
         Args:
-            chromatogram: 色谱图数据
-            time_range: 时间窗口 (min, max)
-            
+            chromatogram: Chromatogram data
+            time_range: Time window (min, max)
+
         Returns:
-            float: 纯度百分比 (0-100)
+            float: Purity percentage (0-100)
         """
         try:
-            # 提取时间窗口内的数据
+            # Extract data within time window
             window_data = chromatogram[
                 (chromatogram['retention_time'] >= time_range[0]) &
                 (chromatogram['retention_time'] <= time_range[1])
             ]
-            
+
             if window_data.empty:
                 return 0.0
-                
-            # 计算主峰面积占比
+
+            # Calculate main peak area ratio
             total_area = window_data['area'].sum()
             if total_area == 0:
                 return 0.0
-                
+
             main_peak_area = window_data['area'].max()
             purity = (main_peak_area / total_area) * 100
-            
-            return min(purity, 100.0)  # 确保不超过100%
+
+            return min(purity, 100.0)  # Ensure not exceeding 100%
             
         except Exception as e:
             self.logger.error(f"Error calculating purity: {str(e)}")
@@ -100,17 +100,17 @@ class PeakAnalyzer:
                        max_peaks: int = 3
                        ) -> List[PeakInfo]:
         """
-        获取主要峰的信息 (按强度排序)
-        
+        Get information of major peaks (sorted by intensity)
+
         Args:
-            chromatogram: 色谱图数据
-            max_peaks: 返回的最大峰数量
-            
+            chromatogram: Chromatogram data
+            max_peaks: Maximum number of peaks to return
+
         Returns:
-            List[PeakInfo]: 主要峰的信息列表
+            List[PeakInfo]: List of major peak information
         """
         try:
-            # 按强度排序并获取前N个峰
+            # Sort by intensity and get top N peaks
             top_peaks = chromatogram.nlargest(max_peaks, 'intensity')
             
             return [
@@ -135,34 +135,34 @@ class PeakAnalyzer:
                              distance: int = 10
                              ) -> pd.DataFrame:
         """
-        在光谱/色谱图中查找峰
-        
+        Find peaks in spectrum/chromatogram
+
         Args:
-            time: 时间数组
-            intensity: 强度数组
-            height_threshold: 峰高阈值（相对最大强度）
-            distance: 峰之间的最小距离（数据点）
-            
+            time: Time array
+            intensity: Intensity array
+            height_threshold: Peak height threshold (relative to maximum intensity)
+            distance: Minimum distance between peaks (data points)
+
         Returns:
-            pd.DataFrame: 包含峰信息的DataFrame
+            pd.DataFrame: DataFrame containing peak information
         """
         try:
-            # 归一化强度
+            # Normalize intensity
             normalized_intensity = intensity / np.max(intensity)
-            
-            # 查找峰
+
+            # Find peaks
             peaks, properties = find_peaks(
                 normalized_intensity,
                 height=height_threshold,
                 distance=distance
             )
-            
-            # 计算峰宽
+
+            # Calculate peak widths
             widths, width_heights, left_ips, right_ips = peak_widths(
                 normalized_intensity, peaks, rel_height=0.5
             )
-            
-            # 计算峰面积（使用梯形积分）
+
+            # Calculate peak areas (using trapezoidal integration)
             areas = []
             for i, peak in enumerate(peaks):
                 left_idx = int(left_ips[i])
@@ -172,13 +172,13 @@ class PeakAnalyzer:
                     time[left_idx:right_idx]
                 )
                 areas.append(peak_area)
-            
-            # 创建结果DataFrame
+
+            # Create result DataFrame
             return pd.DataFrame({
                 'retention_time': time[peaks],
                 'intensity': intensity[peaks],
                 'area': areas,
-                'width': widths * (time[1] - time[0])  # 转换为时间单位
+                'width': widths * (time[1] - time[0])  # Convert to time units
             })
             
         except Exception as e:

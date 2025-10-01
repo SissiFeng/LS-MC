@@ -62,19 +62,19 @@ class DataProcessor:
             raise 
 
     def process_sample(self, raw_file: Path, sample_id: str, smiles: str) -> Dict:
-        """处理样品数据"""
+        """Process sample data"""
         try:
             self.memory_monitor.log_memory_usage('Before processing')
-            
-            # 使用内存优化模式读取数据
+
+            # Read data using memory-optimized mode
             raw_data = self.converter.read_raw_file(
                 raw_file,
                 memory_efficient=True
             )
-            
+
             self.memory_monitor.log_memory_usage('After reading raw file')
-            
-            # 2. 计算质量相关参数
+
+            # 2. Calculate mass-related parameters
             mass_results = self.mass_calculator.calculate_masses(smiles)
             
             # 3. 检测产物和计算纯度
@@ -101,7 +101,7 @@ class DataProcessor:
                 retention_time=retention_time,
                 detected_mass=detected_mass,
                 purity=purity,
-                # ... 其他数据
+                # ... other data
             )
             
             # 清理不需要的数据
@@ -115,7 +115,7 @@ class DataProcessor:
             raise 
 
     def export_results(self, results: List[AnalysisResult], output_path: Path, format: str = 'csv'):
-        """导出分析结果"""
+        """Export analysis results"""
         try:
             data = []
             for result in results:

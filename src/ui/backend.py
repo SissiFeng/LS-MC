@@ -34,7 +34,7 @@ class Backend(QObject):
             file_path = Path(file_url.toLocalFile())
             if file_path.suffix.lower() == '.raw':
                 try:
-                    self.statusChanged.emit(f"处理文件: {file_path.name}", "info")
+                    self.statusChanged.emit(f"Processing file: {file_path.name}", "info")
                     self.progressChanged.emit((i / total_files) * 100)
 
                     # Process sample with complete information
@@ -48,11 +48,11 @@ class Backend(QObject):
                     # Update UI with complete result
                     self._result_data = [vars(result)]  # Convert dataclass to dict
                     self.resultDataChanged.emit()
-                    self.statusChanged.emit(f"成功处理: {file_path.name}", "success")
+                    self.statusChanged.emit(f"Successfully processed: {file_path.name}", "success")
                     
                 except Exception as e:
                     self.logger.error(f"Error processing {file_path}: {str(e)}")
-                    self.statusChanged.emit(f"处理失败: {str(e)}", "error")
+                    self.statusChanged.emit(f"Processing failed: {str(e)}", "error")
 
         self.progressChanged.emit(100)
 

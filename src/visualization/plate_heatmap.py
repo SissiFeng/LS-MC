@@ -97,9 +97,9 @@ class PlateHeatmap:
                            data: List[Dict],
                            value_key: str
                            ) -> np.ndarray:
-        """准备板式数据矩阵"""
+        """Prepare plate data matrix"""
         plate_data = np.zeros((self.PLATE_ROWS, self.PLATE_COLS))
-        plate_data.fill(np.nan)  # 使用NaN表示空孔
+        plate_data.fill(np.nan)  # Use NaN to represent empty wells
         
         for sample in data:
             if 'well' in sample:
@@ -110,7 +110,7 @@ class PlateHeatmap:
         return plate_data
         
     def _parse_well_position(self, well: str) -> tuple:
-        """解析孔位标识（如'A1'）为行列索引"""
+        """Parse well identifier (e.g., 'A1') to row-column indices"""
         if len(well) < 2:
             raise ValueError(f"Invalid well format: {well}")
             
@@ -119,30 +119,30 @@ class PlateHeatmap:
         return row, col
         
     def _add_plate_labels(self, ax):
-        """添加板式标签"""
-        # 添加行标签 (A-H)
+        """Add plate labels"""
+        # Add row labels (A-H)
         ax.set_yticks(range(self.PLATE_ROWS))
         ax.set_yticklabels([chr(ord('A') + i) for i in range(self.PLATE_ROWS)])
-        
-        # 添加列标签 (1-12)
+
+        # Add column labels (1-12)
         ax.set_xticks(range(self.PLATE_COLS))
         ax.set_xticklabels([str(i+1) for i in range(self.PLATE_COLS)])
-        
+
     def _add_structures(self, ax, data: List[Dict]):
-        """添加化合物结构图"""
-        # 清除坐标轴
+        """Add compound structure diagrams"""
+        # Clear axes
         ax.axis('off')
-        
-        # 获取唯一的SMILES
+
+        # Get unique SMILES
         unique_smiles = set(sample['smiles'] for sample in data if 'smiles' in sample)
-        
-        # 为每个化合物生成结构图
+
+        # Generate structure diagram for each compound
         for i, smiles in enumerate(unique_smiles):
             try:
                 mol = Chem.MolFromSmiles(smiles)
                 if mol:
                     img = Draw.MolToImage(mol, size=self.STRUCTURE_SIZE)
-                    # 在右侧面板添加结构图
+                    # Add structure diagram to right panel
                     ax.imshow(img, extent=[i, i+1, 0, 1])
             except Exception as e:
-                self.logger.error(f"Error drawing structure for SMILES {smiles}: {str(e)}") 
+                self.logger.error(f"Error drawing structure for SMILES {smiles}: {str(e)}")

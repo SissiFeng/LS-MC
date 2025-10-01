@@ -4,20 +4,20 @@ from .ui.main_window import MainWindow
 import logging
 
 def main():
-    # 配置日志
+    # Configure logging
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    
-    # 创建应用
+
+    # Create application
     app = QApplication(sys.argv)
-    
-    # 创建主窗口
+
+    # Create main window
     window = MainWindow()
     window.show()
-    
-    # 运行应用
+
+    # Run application
     sys.exit(app.exec())
 
 if __name__ == '__main__':

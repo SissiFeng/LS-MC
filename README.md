@@ -17,65 +17,77 @@ A comprehensive tool for processing Waters LC-MS data files.
 3. Install Waters Raw File Reader
 4. Install the package:
 
-Waters 数据转换工具：
-目前暂定的开发思路：
-1. 文件格式转换（raw → mzML）
+## Waters Data Conversion Tool
 
-使用 ProteoWizard 的 MSConvert 将 .raw 文件转换为 .mzML。
-转换可以直接通过命令行调用 MSConvert，也可以嵌入 Python 的子进程（subprocess）中执行。
-数据解析与信息提取
+### Current Development Approach:
 
-2. 使用 pymzML 读取 mzML 文件，从中提取扫描谱图、峰值数据等信息。
-将提取的数据组织为 pandas DataFrame，方便后续处理。
-数据分析与可视化
+#### 1. File Format Conversion (raw → mzML)
+- Use ProteoWizard's MSConvert to convert .raw files to .mzML format
+- Conversion can be executed directly via command line or embedded in Python subprocess
+- Data parsing and information extraction
 
-3. 提取需要的实验参数（如峰值、强度、保留时间）。
-4. 分析质谱与其他通道（如 UV/Vis）的对应关系。
-5. 生成可视化图表，如热图、谱图等。
-6. 生成实验室所需的输出
+#### 2. Data Processing
+- Use pymzML to read mzML files and extract scan spectra, peak data, and other information
+- Organize extracted data into pandas DataFrame for convenient downstream processing
+- Data analysis and visualization
 
-7. 提供峰值表格、热图，以及多通道对应关系。
-8. 输出格式可以是 CSV、Excel 或 JSON，满足实验室的分析和存档需求。
+#### 3. Parameter Extraction and Analysis
+- Extract required experimental parameters (peaks, intensity, retention time)
+- Analyze correspondence between mass spectra and other channels (UV/Vis)
+- Generate visualization charts such as heatmaps and spectra
+- Generate laboratory-required outputs
 
-这个软件：
-用户通过ui界面从本地上传 .raw 文件/文件夹，
-软件后台：
-软件调用 MSConvert 将 .raw 文件转换为 .mzML 文件，并使用 pymzML 读取 .mzML 文件，从中提取扫描谱图、峰值数据等信息。
-软件将提取的数据组织为 pandas DataFrame，方便后续处理。
-软件提取需要的实验参数（如峰值、强度、保留时间）。
-软件分析质谱与其他通道（如 UV/Vis）的对应关系。
-软件生成可视化图表，如热图、谱图等。
-软件生成实验室所需的输出，提供峰值表格、热图，以及多通道对应关系。
-最终用户界面就是能看到一个list/table，其中有用户需要的各种参数。并且可以输出 CSV、Excel 或 JSON，满足实验室的分析和存档需求。
+#### 4. Output Generation
+- Provide peak tables, heatmaps, and multi-channel correspondence relationships
+- Output formats include CSV, Excel, or JSON to meet laboratory analysis and archival needs
 
-0113 新需求：
-输入参数:
-Sample unique identifier (text)
-Structure (SMILES)
-Raw data file (Waters .raw)
-输出参数:
-A. 质量相关计算 (Must be calculated):
-Molecular Formula (从SMILES计算)
-Monoisotopic mass (从分子式计算)
-M+H mass (monoisotopic mass + 1.0078)
-M+Na mass (monoisotopic mass + 22.9897)
-M-H mass (monoisotopic mass - 1.0073)
-B. 色谱数据分析:
-Processed chromatogram (.mzML/.csv/.rpt格式)
-Product detected? (Yes/No，基于m/z匹配，容差0.5Da)
-Retention time (峰的保留时间，分钟)
-Mass detected (匹配到的质量)
-Purity (0.2-2.5min之间峰的积分)
-C. 主要峰的信息 (对前三个最大峰):
-Peak 1/2/3 - RT (保留时间)
-Mass - Peak 1/2/3 (每个峰的最强离子质量)
-其他功能需求:
-生成样品矩阵/板式格式的热图
-在热图旁显示结构
-支持定义和减去空白PDA光谱
+### Software Workflow:
+**User Interface:** Users upload .raw files/folders through the UI interface
 
-添加对 .rpt 格式的支持
-优化 PDA 数据的积分计算方法
+**Backend Processing:**
+- Software calls MSConvert to convert .raw files to .mzML files
+- Uses pymzML to read .mzML files and extract scan spectra, peak data, and other information
+- Organizes extracted data into pandas DataFrame for convenient processing
+- Extracts required experimental parameters (peaks, intensity, retention time)
+- Analyzes correspondence between mass spectra and other channels (UV/Vis)
+- Generates visualization charts such as heatmaps and spectra
+- Generates laboratory-required outputs including peak tables, heatmaps, and multi-channel relationships
+
+**Final Output:** User interface displays a list/table containing various parameters needed by users, with export capabilities to CSV, Excel, or JSON formats for laboratory analysis and archival requirements.
+
+## Requirements (January 13th Update):
+
+### Input Parameters:
+- Sample unique identifier (text)
+- Structure (SMILES)
+- Raw data file (Waters .raw)
+
+### Output Parameters:
+
+#### A. Mass-Related Calculations (Must be calculated):
+- Molecular Formula (calculated from SMILES)
+- Monoisotopic mass (calculated from molecular formula)
+- M+H mass (monoisotopic mass + 1.0078)
+- M+Na mass (monoisotopic mass + 22.9897)
+- M-H mass (monoisotopic mass - 1.0073)
+
+#### B. Chromatographic Data Analysis:
+- Processed chromatogram (.mzML/.csv/.rpt format)
+- Product detected? (Yes/No, based on m/z matching with 0.5Da tolerance)
+- Retention time (peak retention time in minutes)
+- Mass detected (matched mass)
+- Purity (peak integration between 0.2-2.5 minutes)
+
+#### C. Major Peak Information (for top three largest peaks):
+- Peak 1/2/3 - RT (retention time)
+- Mass - Peak 1/2/3 (strongest ion mass for each peak)
+
+### Additional Feature Requirements:
+- Generate sample matrix/plate format heatmaps
+- Display structure alongside heatmap
+- Support definition and subtraction of blank PDA spectra
+- Add support for .rpt format
+- Optimize PDA data integration calculation methods
 
 SMILES for the expected product is NCCC(NCc(cc1)cc(CN2C(CCC(N3)=O)C3=O)c1C2=O)=O. 
 
@@ -111,7 +123,7 @@ LS-MS/
 ├── tests/
 ├── data/
 │   ├── raw/
-│   │   └── "AC P1 E3.raw"    # 测试文件
+│   │   └── "AC P1 E3.raw"    # Test file
 │   ├── mzml/
 │   └── output/
 ├── requirements.txt

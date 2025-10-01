@@ -4,13 +4,13 @@ import pandas as pd
 import logging
 
 class DataValidator:
-    """验证数据的完整性和有效性"""
-    
+    """Validate data integrity and validity"""
+
     def __init__(self):
         self.logger = logging.getLogger('DataValidator')
-        
+
     def validate_peaks(self, peaks_df: pd.DataFrame) -> Dict[str, bool]:
-        """验证峰数据的有效性"""
+        """Validate peak data validity"""
         checks = {
             'has_data': len(peaks_df) > 0,
             'has_required_columns': all(col in peaks_df.columns for col in [
@@ -25,7 +25,7 @@ class DataValidator:
         return checks
 
     def validate_mzml_file(self, mzml_path: Path) -> bool:
-        """验证mzML文件是否可读"""
+        """Validate if mzML file is readable"""
         try:
             from pymzml import run
             run.Reader(str(mzml_path))

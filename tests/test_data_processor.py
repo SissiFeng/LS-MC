@@ -21,7 +21,7 @@ class TestDataProcessor:
         })
     
     def test_process_sample(self, processor, tmp_path):
-        # 创建模拟的raw文件
+        # Create mock raw file
         raw_file = tmp_path / "test.raw"
         raw_file.touch()
         
